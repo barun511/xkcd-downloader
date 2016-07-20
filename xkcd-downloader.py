@@ -13,7 +13,7 @@ print("Saving in xkcd-comics/ by default")
 init_url = "http://xkcd.com/"
 init_comic_number = 1
 # Loop through all the comics
-while 1:
+while init_comic_number < 5:
     r = requests.get(init_url + str(init_comic_number)) # Look at the http response of each comic
     if r.text.find("404") != -1: # This is a tricky one. I could have checked for the presence of 404, but that would have caused an issue if there was 404 in the alternate text or title of a comic. This was probably not the best check. TODO, fix this later.
         print("No comic found with link " + init_url + str(init_comic_number) + ". Download complete. Exiting ") 
@@ -26,7 +26,7 @@ while 1:
         print(image_path)
         pos = pos_end + 2 + len('title="')
         pos_end = r.text.find('alt',pos) - 2
-        alt_text = (r.text[pos:pos_end])
+        alt_text = (r.text[pos:pos_end]).replace("&#39;","'") 
         print(alt_text)
-        urllib.request.urlretrieve(image_path, directory + str(init_comic_number))
+        urllib.request.urlretrieve(image_path, directory + str(init_comic_number) + ':' + alt_text)
     init_comic_number = init_comic_number + 1
