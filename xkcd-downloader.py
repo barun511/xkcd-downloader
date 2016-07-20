@@ -19,14 +19,19 @@ while init_comic_number < 5:
         print("No comic found with link " + init_url + str(init_comic_number) + ". Download complete. Exiting ") 
         print(r.text)
     else:
+        title_init = r.text.find('<title>') + len('<title>xkcd: ')
+        title_end = r.text.find('</title>')
+        title = r.text[title_init:title_end]
         pos = r.text.find('<div id="comic">') # This is where the comic exists in the HTML area.
         pos = pos + len('<div id="comic">\n<img src="')
         pos_end = r.text.find(' ',pos) - 1 # Find the next whitespace. The '-1' is to ignore the next quotation mark. 
         image_path = "http:" + r.text[pos:pos_end]
+        print(init_comic_number)
+        print(title)
         print(image_path)
         pos = pos_end + 2 + len('title="')
         pos_end = r.text.find('alt',pos) - 2
         alt_text = (r.text[pos:pos_end]).replace("&#39;","'") 
         print(alt_text)
-        urllib.request.urlretrieve(image_path, directory + str(init_comic_number) + ':' + alt_text)
+        urllib.request.urlretrieve(image_path, directory + str(init_comic_number) + ' : ' + title + '\n' + alt_text)
     init_comic_number = init_comic_number + 1
