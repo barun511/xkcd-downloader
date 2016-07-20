@@ -1,6 +1,6 @@
 try:
     import requests
-    import urllib3
+    import urllib.request
     import sys
     import os
 except ImportError:
@@ -8,22 +8,25 @@ except ImportError:
 
 # Directory where the xkcd files will be saved
 directory = "xkcd-comics/"
-if sys.argv[1]=='':
-    print("Saving in /xkcd-comics/ directory by default")
-else:
-    directory = str(sys.argv[1])
-    print("Saving in " + directory)
-
+print("Saving in xkcd-comics/ by default")
 # Starting from 1
 init_url = "http://xkcd.com/"
 init_comic_number = 1
 # Loop through all the comics
-while init_comic_number < 3:
+while 1:
     r = requests.get(init_url + str(init_comic_number)) # Look at the http response of each comic
-    if r.text.find("404"): # This is a tricky one. I could have checked for the presence of 404, but that would have caused an issue if there was 404 in the alternate text or title of a comic. This was probably not the best check. TODO, fix this later.
+    if r.text.find("404") != -1: # This is a tricky one. I could have checked for the presence of 404, but that would have caused an issue if there was 404 in the alternate text or title of a comic. This was probably not the best check. TODO, fix this later.
         print("No comic found with link " + init_url + str(init_comic_number) + ". Download complete. Exiting ") 
         print(r.text)
     else:
-        pos = r.text.find('<div id="comic">')
-        print(pos)
+        pos = r.text.find('<div id="comic">') # This is where the comic exists in the HTML area.
+        pos = pos + len('<div id="comic">\n<img src="')
+        pos_end = r.text.find(' ',pos) - 1 # Find the next whitespace. The '-1' is to ignore the next quotation mark. 
+        image_path = "http:" + r.text[pos:pos_end]
+        print(image_path)
+        pos = pos_end + 2 + len('title="')
+        pos_end = r.text.find('alt',pos) - 2
+        alt_text = (r.text[pos:pos_end])
+        print(alt_text)
+        urllib.request.urlretrieve(image_path, directory + str(init_comic_number))
     init_comic_number = init_comic_number + 1
